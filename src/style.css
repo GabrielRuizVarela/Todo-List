@@ -1,3 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Koulen&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --color-dark: #4a1942;
+    --color-light: #E3BEC6;
+    --color-light-1: #f5f5f4;
+    --color-grey: #b4b4b4;
+    font-family: 'Lato', sans-serif;
+}
+
 * {
-    background-color: black;
+    /* border: 1px solid black; */
+}
+
+/* ---DropdownMenu--- */
+
+.dropdown-menu {
+    padding-top: 1rem;
+    padding-left: 0.5rem;
+    background-color: var(--color-light-1);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
+}
+
+.dropdown.active>.dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* ---TopBar--- */
+#top-bar {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    justify-items: center;
+    gap: 1rem;
+    height: 44px;
+    padding: 0 2rem;
+    color: var(--color-dark);
+    background-color: var(--color-light);
+    font-family: 'Koulen', cursive;
+    font-size: 1.2rem;
+}
+
+[data-icon].iconify {
+    font-size: 1.2rem;
+    /* color: black; */
+}
+
+[data-icon]:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ---Main--- */
+#main {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---Sidebar--- */
+#sidebar {
+    font-size: 1.1rem;
+    height: calc(100vh - 44px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 2rem;
+    padding: 2rem 0 0 2rem;
+    position: fixed;
+    width: 300px;
+    left: 0;
+    overflow: hidden;
+    color: var(--color-dark);
+    background-color: var(--color-light-1);
+    transition: transform 300ms ease-in-out;
+}
+
+.sidebar-inactive {
+    transform: translateX(-300px);
+}
+
+#sidebar>* {
+    cursor: pointer;
+}
+
+#sidebar ul {
+    text-decoration: none;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+}
+
+#sidebar li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem;
+    align-content: center;
+}
+
+#sidebar .project {
+    font-size: 1.1rem;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 2rem;
+}
+
+#sidebar [data-icon="ic:baseline-expand-more"] {
+    font-size: 1.4rem;
+}
+
+/* ---App--- */
+#app-container {
+    margin-left: 300px;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 4rem;
+    transition: margin 300ms ease-in-out;
+}
+
+#app-container.app-sidebar-inactive {
+    margin: 0px;
+}
+
+#app-container .title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#add-task {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+#add-task-listener {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    gap: 0.25rem;
+    color: var(--color-grey);
+}
+
+#app-container [data-icon="akar-icons:plus"] {
+    color: var(--color-dark);
+}
+
+#add-task:hover>[data-icon="akar-icons:plus"] {
+    background-color: var(--color-dark);
+    color: var(--color-light-1);
+    border-radius: 50%;
+}
+
+#add-task-listener:hover {
+    color: var(--color-dark);
+}
+
+#add-field {
+    display: grid;
+    border: 1px solid var(--color-grey);
+    border-radius: 10px;
+    margin: 0.5rem 0;
+}
+
+textarea {
+    margin: 0.5rem;
+    border: none;
+    resize: none;
+}
+
+.add-field-buttons {
+    margin: 0.5rem;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    gap: 0.5rem;
+}
+
+.add-field-buttons>button {
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    color: grey;
+    font-weight: 100;
+    border: 1px solid var(--color-grey);
+    background-color: white;
+}
+
+#add-task-button {
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    font-weight: 600;
+}
+
+#check{
+    display:none;
 }
