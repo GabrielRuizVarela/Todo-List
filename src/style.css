@@ -205,3 +205,55 @@ textarea {
 #check{
     display:none;
 }
+
+/* ---Todos--- */
+
+.todo {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-light);
+    margin-bottom: 0.5rem;
+}
+
+.todo .checkmark{
+    margin: 0.5rem;
+}
+
+.todo button{
+    background-color: white;
+    color: var(--color-grey);
+    border: none;
+    cursor: pointer;
+    margin-right: 0.3rem;
+    font-size: 0.7rem;
+}
+.todo button:hover {
+    color: black;
+}
+
+.todo-date-text {
+    white-space: nowrap;
+}
+
+.todo-text {
+    display: grid;
+    grid-auto-flow: rows;
+    font-size: 0.9rem;
+}
+
+.todo-description {
+    color: var(--color-grey);
+    margin-bottom: 0.2rem;
+}
+
+.todo-buttons {
+    display: grid;
+    grid-template-columns: min-content min-content;
+}
+
+.todo-date,
+.todo-tag {
+    display: flex;
+    align-items: center;
+}
