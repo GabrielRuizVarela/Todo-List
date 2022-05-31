@@ -73,13 +73,15 @@ const generate = (()=>{
     }
     pubsub.subscribe('addedTodo', displayTodo);
     function displayTodo(array) {
+        if(document.querySelector('.todo')){document.querySelectorAll('.todo').forEach( element=> element.remove())}
         const appContainer = document.querySelector('#app-container');
-        const div = document.createElement('div');
-        div.classList.add('todo');
         array.forEach(todo => {
+            const div = document.createElement('div');
+            div.classList.add('todo');
+            div.setAttribute('data-id',todo.id);
             appContainer.insertBefore(div, document.getElementById('add-task'));
             div.innerHTML = `
-                <svg data-checkmark='1' class='checkmark' width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg data-id=${todo.id} class='checkmark' width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g id="Group">
                         <g id="check">
                             <path id="Vector" fill-rule="evenodd" clip-rule="evenodd"
@@ -105,6 +107,12 @@ const generate = (()=>{
                         </button>
                     </div>
                 </div>`
+        })
+        document.querySelectorAll('.checkmark').forEach(element=>{
+            element.addEventListener('click',()=>{
+                element.classList.toggle('checked');
+                pubsub.publish('checked', element.getAttribute('data-id'))
+            })
         })
     }
 

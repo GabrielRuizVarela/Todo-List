@@ -257,3 +257,7 @@ textarea {
     display: flex;
     align-items: center;
 }
+
+.checked #check{
+    display:block;
+}
