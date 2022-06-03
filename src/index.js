@@ -1,8 +1,8 @@
 import './style.css';
-import {generate} from './DOM'
+import {generate, Project} from './DOM'
 import {parse, format, lightFormat} from 'date-fns'
 import {pubsub} from './pubsub'
-import todo from './todo'
+import {todo} from './todo'
 console.log("It's working")
 
 // document.addEventListener('DOMContentLoaded',()=>{

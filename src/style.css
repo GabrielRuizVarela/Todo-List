@@ -37,6 +37,17 @@
     transform: translateY(0);
     pointer-events: auto;
 }
+.add-container .dropdown-menu {
+    position: absolute;
+    border: 1px solid var(--color-light);
+    padding: 0.3rem;
+    display: grid;
+    grid-auto-flow: row;
+    gap: 0.2rem;
+}
+li{
+    list-style: none;
+}
 
 /* ---TopBar--- */
 #top-bar {
@@ -119,6 +130,17 @@
 #sidebar [data-icon="ic:baseline-expand-more"] {
     font-size: 1.4rem;
 }
+#sidebar .dropdown-menu li{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding-right: 2rem;
+}
+#sidebar .dropdown-menu li svg{
+    display: none;
+}
+#sidebar .dropdown-menu li:hover svg{
+    display: block;
+}
 
 /* ---App--- */
 #app-container {
@@ -187,7 +209,7 @@ textarea {
     gap: 0.5rem;
 }
 
-.add-field-buttons>button {
+.add-field-buttons button {
     padding: 0.4rem 0.6rem;
     border-radius: 5px;
     color: grey;
@@ -210,10 +232,11 @@ textarea {
 
 .todo {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--color-light);
     margin-bottom: 0.5rem;
+    align-items: center;
 }
 
 .todo .checkmark{
@@ -260,4 +283,11 @@ textarea {
 
 .checked #check{
     display:block;
+}
+
+.delete-button{
+    display:none;
+}
+.todo:hover .delete-button{
+    display: block;
 }

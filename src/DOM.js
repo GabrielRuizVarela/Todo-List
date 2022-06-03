@@ -1,4 +1,5 @@
-import {parse, lightFormat, startOfToday} from "date-fns";
+import {parse, lightFormat, startOfToday, isToday, isBefore} from "date-fns";
+import { format } from "date-fns/esm";
 // import { addTask, generateInbox } from "./DOMgeneration";
 import {pubsub} from "./pubsub";
 
@@ -7,14 +8,37 @@ import {pubsub} from "./pubsub";
 const generate = (()=>{
     //init
     let add = true;
+    let leftPanelSelected = 'Inbox';
     document.addEventListener('DOMContentLoaded',()=>{
-        generateMain('Inbox')
+        generateMain(leftPanelSelected);
+        pubsub.publish('LeftPanelClick', 'Inbox');
     });
+    document.querySelector('[data-icon="akar-icons:home"]').addEventListener('click',()=>{
+        generateMain('Inbox')
+        leftPanelSelected = 'Inbox';
+        pubsub.publish('LeftPanelClick', 'Inbox');
+    })
     //On Click Inbox
     document.querySelector('#inbox-button')
         .addEventListener('click',()=>{
             generateMain('Inbox');
+            leftPanelSelected = 'Inbox';
+            pubsub.publish('LeftPanelClick', 'Inbox');
         });
+    //On Click Today
+    document.querySelector('#today-button')
+    .addEventListener('click',()=>{
+        generateMain('Today');
+        leftPanelSelected = 'Today'
+        pubsub.publish('LeftPanelClick', 'Today');
+    });
+    //On Click Today
+    document.querySelector('#upcoming-button')
+    .addEventListener('click',()=>{
+        generateMain('Upcoming');
+        leftPanelSelected = 'Upcoming'
+        pubsub.publish('LeftPanelClick', 'Upcoming');
+    });
 
     function generateMain(title) {
         const container = document.querySelector('#app-container');
@@ -28,6 +52,7 @@ const generate = (()=>{
         <div></div>
         </div>`
         document.querySelector('#add-task-listener').addEventListener('click',addTask);
+        document.querySelector('[data-icon="akar-icons:plus"]').addEventListener('click',addTask);
     }
     // add task button
     const addTask = ()=>{
@@ -42,7 +67,10 @@ const generate = (()=>{
                         <textarea name="description" id="description" cols="30" rows="2" placeholder="Description"></textarea>
                         <div class="add-field-buttons">
                             <input type="date" name="date-button" id="date-button" value=${lightFormat(startOfToday(), 'yyyy-MM-dd')}>
-                            <button type="button" id="list-button">Inbox</button>
+                            <div class='dropdown' data-dropdown>
+                            <button type="button" id="list-button" data-dropdown-button >Inbox</button>
+                            <div class='dropdown-menu'><ul></ul></div>
+                            </div>
                         </div>
                     </div>
                     <div class="add-field-buttons">
@@ -51,6 +79,17 @@ const generate = (()=>{
                     </div>
                     </div>`;
             container.appendChild(div);
+            // console.log(div.querySelector('[data-dropdown]'))
+            pubsub.publish('projectDropdown',div.querySelector('[data-dropdown]'))
+            div.querySelectorAll('[data-dropdown] li').forEach(element=>{
+                element.addEventListener('click',(e)=>{
+                    if(e.target.textContent==='None'){
+                        div.querySelector('button').textContent='Inbox';
+                    }else{
+                        div.querySelector('button').textContent=e.target.textContent;
+                    }
+                })
+            })
             // cancel button event
             document.querySelector('#cancel-button').addEventListener('click',()=>{
                 document.querySelector('.add-container').remove();
@@ -61,10 +100,12 @@ const generate = (()=>{
                 let name = document.querySelector('#name').value;
                 let description = document.querySelector('#description').value;
                 let date = document.querySelector('#date-button').value;
-                date = parse(date, 'yyyy-M-d', new Date());
+                let project = document.querySelector('#list-button').textContent
+                // if(project==='Inbox'){ project= '' }
+                // date = parse(date, 'yyyy-M-d', new Date());
                 document.querySelector('.add-container').remove();
                 add = true;
-                pubsub.publish('addTask', {name, description, date});
+                pubsub.publish('addTask', {name, description, date, project});
             })
         } else {
             document.querySelector('.add-container').remove();
@@ -72,16 +113,27 @@ const generate = (()=>{
         add = !add;
     }
     pubsub.subscribe('addedTodo', displayTodo);
+    pubsub.subscribe('drawTodos', displayTodo);
     function displayTodo(array) {
+        if(leftPanelSelected==='Today'){
+            array = array.filter(element=>isToday(parse(element.date,'yyyy-M-d', new Date())));
+        }else if(leftPanelSelected==='Upcoming'){
+            array = array.filter(element=>!isBefore(parse(element.date,'yyyy-M-d', new Date()),startOfToday()));
+        } else if (leftPanelSelected!=='Inbox'){
+            array = array.filter(element=>element.project == leftPanelSelected)
+        }
+        if(!array){ return }
         if(document.querySelector('.todo')){document.querySelectorAll('.todo').forEach( element=> element.remove())}
         const appContainer = document.querySelector('#app-container');
         array.forEach(todo => {
+            let checkedClass = '';
             const div = document.createElement('div');
             div.classList.add('todo');
             div.setAttribute('data-id',todo.id);
             appContainer.insertBefore(div, document.getElementById('add-task'));
+            if(todo.completed){checkedClass = 'checked'}
             div.innerHTML = `
-                <svg data-id=${todo.id} class='checkmark' width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg data-id=${todo.id} class='checkmark ${checkedClass}' width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g id="Group">
                         <g id="check">
                             <path id="Vector" fill-rule="evenodd" clip-rule="evenodd"
@@ -99,23 +151,34 @@ const generate = (()=>{
                     <div class="todo-buttons">
                         <button class="todo-date" type="button">
                             <span class="iconify todo-date-icon" data-icon="ant-design:calendar-twotone"></span>
-                            <div class="todo-date-text">${lightFormat(todo.date,'d/M')}</div>
+                            <div class="todo-date-text">${lightFormat(parse(todo.date,'yyyy-M-d', new Date()),'d/M')}</div>
                         </button>
                         <button class="todo-tag" type="button">
                             <span class="iconify todo-tag-icon" data-icon="akar-icons:tag"></span>
-                            <div class="todo-tag-text">Work</div>
+                            <div class="todo-tag-text">${todo.project}</div>
                         </button>
                     </div>
+                </div>
+                <div class='delete-button'>
+                <span class="iconify" data-icon="ant-design:delete-outlined"></span>
                 </div>`
-        })
+            })
         document.querySelectorAll('.checkmark').forEach(element=>{
             element.addEventListener('click',()=>{
                 element.classList.toggle('checked');
                 pubsub.publish('checked', element.getAttribute('data-id'))
             })
         })
+        document.querySelectorAll('.delete-button').forEach(element=>{
+            element.addEventListener('click',()=>{
+                pubsub.publish('deleteTodo', element.parentElement.getAttribute('data-id'))
+            })
+        })
     }
-
+    function setLeftPanelSelected(str){
+        leftPanelSelected = str;
+    }
+    return {setLeftPanelSelected, generateMain}
 })()
 
 
@@ -139,4 +202,71 @@ const toggleMenu = (()=>{
         sidebar.classList.toggle('sidebar-inactive');
         appContainer.classList.toggle('app-sidebar-inactive');
     })
+})()
+
+const Project = (()=>{
+    let add=true;
+    const addProjectIcon = document.querySelector('#projects [data-icon="akar-icons:plus"]');
+    addProjectIcon.addEventListener('click', addProject);
+    
+    pubsub.subscribe('drawProjects', drawProjects)
+
+    function createProject(){
+        const li = document.createElement('li');
+        const div = document.createElement('div');
+        div.classList.add('text');
+        const div2 = document.createElement('div');
+        div2.classList.add('icon');
+        div2.innerHTML = `<span class="iconify" data-icon="ant-design:delete-outlined"></span>`;
+        li.appendChild(div)
+        li.appendChild(div2)
+        return li;
+    }
+
+    function addProject(){
+        if(add){
+            let area = document.createElement('textarea');
+            area.setAttribute('rows','1');
+            let li = document.createElement('li');
+            li.classList.add('textarea');
+            document.querySelector('.dropdown-menu ul')
+                .appendChild(li).appendChild(area).select();
+            area.addEventListener('keypress',addField);
+            add =! add;
+        }else {
+            document.querySelector('.dropdown textarea').remove();
+            add = !add;
+        }
+    }
+    function render(str){
+        const li = createProject()
+            li.querySelector('.text').textContent = str.name;
+            li.setAttribute('data-id',str.id)
+            document.querySelector('.dropdown-menu ul')
+                .appendChild(li);
+            li.querySelector('.text').addEventListener('click',()=>{
+                generate.setLeftPanelSelected (li.querySelector('.text').textContent);
+                generate.generateMain(li.querySelector('.text').textContent);
+                pubsub.publish('LeftPanelClick', '');
+            })
+            // console.log(document.querySelector(`[data-id="${str.id}"] span`))
+            // li.querySelector('.iconify--ant-design').addEventListener('click',deleteProject)
+    }
+    function addField(e){
+        if(e.key==='Enter'){
+            pubsub.publish('addedProject', e.target.value)
+            e.target.remove();
+            add=true;
+        }
+    }
+    function drawProjects(array){
+        document.querySelector('.dropdown-menu ul').innerHTML=''
+        array.forEach(element=>render(element));
+
+        document.querySelectorAll('.dropdown-menu .icon')
+            .forEach(element=>element.addEventListener('click',deleteProject))
+    }
+    function deleteProject(e){
+        pubsub.publish('deleteProject', e.target.parentElement.parentElement.getAttribute('data-id'))
+    }
 })()
